@@ -1,11 +1,9 @@
 export interface PokemonPage {
-  count: number;
+  results: { name: string }[];
   next: string | null;
   previous: string | null;
-  results: {
-    name: string;
-  }[];
 }
+
 export interface Pokemon {
   name: string;
   types: {
