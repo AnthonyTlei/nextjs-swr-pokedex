@@ -3,14 +3,26 @@
 import usePokemon from "@/hooks/usePokemon";
 import Image from "next/image";
 import Link from "next/link";
-import { Spinner } from "react-bootstrap";
+import { FormEvent } from "react";
+import { Button, Form, Spinner } from "react-bootstrap";
+import * as PokemonApi from "@/network/pokemon-api";
 
 interface PokemonDetailsProps {
   pokemonName: string;
 }
 
 export default function PokemonDetails({ pokemonName }: PokemonDetailsProps) {
-  const { pokemon, pokemonLoading } = usePokemon(pokemonName);
+  const { pokemon, pokemonLoading, mutatePokemon } = usePokemon(pokemonName);
+
+  async function handleSubmitNickname(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const formData = new FormData(e.target as HTMLFormElement);
+    const nickname = formData.get("nickname")?.toString().trim();
+    if (!pokemon || !nickname) return;
+    const update = await PokemonApi.setNickname(pokemon, nickname);
+    mutatePokemon(update, {revalidate: false});
+  }
+
   return (
     <div className="d-flex flex-column align-items-center">
       <p>
@@ -42,6 +54,19 @@ export default function PokemonDetails({ pokemonName }: PokemonDetailsProps) {
               <strong>Weight: </strong> {pokemon.weight / 10} kg
             </div>
           </div>
+          <Form className="mt-4 " onSubmit={handleSubmitNickname}>
+            <Form.Group controlId="pokemon-nickname-input" className="mb-3">
+              <Form.Label>Name the Pokemon!</Form.Label>
+              <Form.Control
+                name="nickname"
+                type="text"
+                placeholder="Enter nickname"
+              />
+            </Form.Group>
+            <Button variant="primary" type="submit">
+              Save
+            </Button>
+          </Form>
         </>
       )}
     </div>
